@@ -443,6 +443,17 @@ static uint8_t rawhid_report_desc[] = {
 };
 #endif
 
+#ifdef IFC_INTERFACE
+static uint8_t etceos_report_desc[] = {
+  0x05, 0x00, 0x09,
+  0x00, 0xA1, 0x01,
+  0xA1, 0x00,
+  0x15, 0x80, 0x25, 0x7F, 0x75, 0x08, 0x09, 0x01,
+  0x95, 0x40, 0x81, 0x02, 0x09, 0x02, 0x95, 0x40,
+  0x91, 0x02, 0xC0, 0xC0
+};
+#endif
+
 #ifdef FLIGHTSIM_INTERFACE
 static uint8_t flightsim_report_desc[] = {
         0x06, 0x1C, 0xFF,               // Usage page = 0xFF1C
@@ -572,8 +583,16 @@ static uint8_t flightsim_report_desc[] = {
 #define MULTITOUCH_INTERFACE_DESC_SIZE	0
 #endif
 
-#define CONFIG_DESC_SIZE		MULTITOUCH_INTERFACE_DESC_POS+MULTITOUCH_INTERFACE_DESC_SIZE
+#define IFC_INTERFACE_DESC_POS  MULTITOUCH_INTERFACE_DESC_POS+MULTITOUCH_INTERFACE_DESC_SIZE
+#ifdef  IFC_INTERFACE
+#define IFC_INTERFACE_DESC_SIZE  9+9+7+7
+#define IFC_HID_DESC_OFFSET    IFC_INTERFACE_DESC_POS+9
+#else
+#define IFC_INTERFACE_DESC_SIZE  0
+#endif
 
+
+#define CONFIG_DESC_SIZE    IFC_INTERFACE_DESC_POS+IFC_INTERFACE_DESC_SIZE
 
 
 // **************************************************************
@@ -1401,6 +1420,42 @@ static uint8_t config_descriptor[CONFIG_DESC_SIZE] = {
         MULTITOUCH_SIZE, 0,                     // wMaxPacketSize
         1,                                      // bInterval
 #endif // KEYMEDIA_INTERFACE
+
+#ifdef USB_ETC_EOS
+  // interface descriptor, USB spec 9.6.5, page 267-269, Table 9-12
+  9,                                      // bLength
+  4,                                      // bDescriptorType
+  IFC_INTERFACE,                       // bInterfaceNumber
+  0,                                      // bAlternateSetting
+  2,                                      // bNumEndpoints
+  0x03,                                   // bInterfaceClass (0x03 = HID)
+  0x01,                                   // bInterfaceSubClass
+  0x02,                                   // bInterfaceProtocol
+  0,                                      // iInterface
+  // HID interface descriptor, HID 1.11 spec, section 6.2.1
+  9,                                      // bLength
+  0x21,                                   // bDescriptorType
+  0x11, 0x01,                             // bcdHID
+  0,                                      // bCountryCode
+  1,                                      // bNumDescriptors
+  0x22,                                   // bDescriptorType
+  LSB(sizeof(etceos_report_desc)),        // wDescriptorLength
+  MSB(sizeof(etceos_report_desc)),
+  // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
+  7,                                      // bLength
+  5,                                      // bDescriptorType
+  IFC_TX_ENDPOINT | 0x80,              // bEndpointAddress
+  0x03,                                   // bmAttributes (0x03=intr)
+  IFC_TX_SIZE, 0,                      // wMaxPacketSize
+  IFC_TX_INTERVAL,                     // bInterval
+  // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
+  7,                                      // bLength
+  5,                                      // bDescriptorType
+  IFC_RX_ENDPOINT,                     // bEndpointAddress
+  0x03,                                   // bmAttributes (0x03=intr)
+  IFC_RX_SIZE, 0,                      // wMaxPacketSize
+  IFC_RX_INTERVAL,      // bInterval
+#endif // USB_ETC_EOS
 };
 
 
@@ -1535,6 +1590,10 @@ const usb_descriptor_list_t usb_descriptor_list[] = {
 #endif
 #ifdef MTP_INTERFACE
 	{0x0304, 0x0409, (const uint8_t *)&usb_string_mtp, 0},
+#endif
+#ifdef IFC_INTERFACE
+  {0x2200, IFC_INTERFACE, etceos_report_desc, sizeof(etceos_report_desc)},
+  {0x2100, IFC_INTERFACE, config_descriptor+IFC_HID_DESC_OFFSET, 9},
 #endif
         {0x0300, 0x0000, (const uint8_t *)&string0, 0},
         {0x0301, 0x0409, (const uint8_t *)&usb_string_manufacturer_name, 0},

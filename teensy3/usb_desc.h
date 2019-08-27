@@ -768,6 +768,27 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define ENDPOINT7_CONFIG	ENDPOINT_RECEIVE_ISOCHRONOUS
   #define ENDPOINT8_CONFIG	ENDPOINT_TRANSMIT_ISOCHRONOUS
 
+#elif defined(USB_ETC_EOS)
+  #define VENDOR_ID    0x14D5
+  #define PRODUCT_ID    0x003A
+  #define MANUFACTURER_NAME  {'E','T','C'}
+  #define MANUFACTURER_NAME_LEN  3
+  #define PRODUCT_NAME    {'E','T','C',' ','E','O','S',' ','P','L','A','Y','B','A','C','K',' ','C','O','N','T','R','O','L'}
+  #define PRODUCT_NAME_LEN  24
+  #define EP0_SIZE    64
+  #define NUM_ENDPOINTS         2
+  #define NUM_USB_BUFFERS  12
+  #define NUM_INTERFACE    1
+  #define IFC_INTERFACE      0
+  #define IFC_TX_ENDPOINT    1
+  #define IFC_TX_SIZE        64
+  #define IFC_TX_INTERVAL    1
+  #define IFC_RX_ENDPOINT    2
+  #define IFC_RX_SIZE        64
+  #define IFC_RX_INTERVAL    1
+  #define ENDPOINT1_CONFIG  ENDPOINT_TRANSIMIT_ONLY
+  #define ENDPOINT2_CONFIG  ENDPOINT_RECEIVE_ONLY
+
 #elif defined(USB_EVERYTHING)
   #define VENDOR_ID		0x16C0
   #define PRODUCT_ID		0x0476

@@ -38,10 +38,12 @@ void yield(void)
 
 	if (running) return; // TODO: does this need to be atomic?
 	running = 1;
+#ifdef USB_SERIAL
 	if (Serial.available()) serialEvent();
 	if (Serial1.available()) serialEvent1();
 	if (Serial2.available()) serialEvent2();
 	if (Serial3.available()) serialEvent3();
+#endif
 #ifdef HAS_KINETISK_UART3
 	if (Serial4.available()) serialEvent4();
 #endif
